@@ -14,7 +14,6 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,7 +45,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun test() {
         val readFiles = ReadFiles(this)
-        readFiles.getAllFiles()
+
+        val list = readFiles.getAllFiles()
+        if (list.isEmpty()) Log.d(TAG, "list.isEmpty()")
+        for (i in list) Log.d(TAG, "file = $i")
 
 //        val listPdf = readFiles.getPdfFiles()
 //        if (listPdf.isEmpty()) Log.d(TAG, "list with pdf is empty")

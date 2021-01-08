@@ -1,8 +1,8 @@
 package com.koleychik.testscopedstorage
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import com.koleychik.testscopedstorage.models.FileModel
@@ -15,6 +15,7 @@ class ReadFiles(private val context: Context) {
 
     private val contentUri = "external"
 
+    @SuppressLint("Recycle")
     fun getImages(): List<Image> {
         val uriExternal: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val listRes = mutableListOf<Image>()
@@ -29,13 +30,11 @@ class ReadFiles(private val context: Context) {
             null,
             null,
             sorterOrder
-//            null
         ) ?: return listRes
 
         Log.d(MainActivity.TAG, "cursor != null")
 
         while (cursor.moveToNext()) {
-//                Log.d(MainActivity.TAG, "start while")
             imageId = cursor.getLong(0)
             val uri = Uri.withAppendedPath(uriExternal, "" + imageId)
             listRes.add(Image(imageId, uri))
@@ -44,6 +43,7 @@ class ReadFiles(private val context: Context) {
         return listRes
     }
 
+    @SuppressLint("Recycle")
     fun getPdfFiles(): List<FileModel> {
         val selection = "_data LIKE '%.pdf'"
         val projections =
@@ -60,17 +60,27 @@ class ReadFiles(private val context: Context) {
         while (cursor.moveToNext()) listRes.add(FileModel(cursor.getLong(0), cursor.getString(1)))
         cursor.close()
         return listRes
-
-
-//        val file = File(context.getExternalFilesDir("/"), "")
-//        val files = file.listFiles()
-//        //        Log.d(MainActivity.TAG, "mainFile.name = " + file.name)
-//        val files = context.getExternalFilesDirs("/files/files/files")
-//        Log.d(MainActivity.TAG, "files.size = ${files.size}")
-//        for (i in files!!) Log.d(MainActivity.TAG, "file.name = ${i.name}")
     }
 
-    fun getAllFiles() {
+    @SuppressLint("Recycle")
+    fun getAllFiles(): List<FileModel>{
+        val projections =
+            arrayOf(storeFile._ID, storeFile.DISPLAY_NAME)
+        val cursor = context.contentResolver.query(
+            MediaStore.Files.getContentUri(contentUri),
+            projections,
+            null,
+            null,
+            null
+        ) ?: return listOf()
+
+        val listRes = mutableListOf<FileModel>()
+        while (cursor.moveToNext()) listRes.add(FileModel(cursor.getLong(0), cursor.getString(1)))
+        cursor.close()
+        return listRes
+    }
+
+    fun getAllFilesAndFolders() {
 
         val file = File("/storage/emulated/0")
 
