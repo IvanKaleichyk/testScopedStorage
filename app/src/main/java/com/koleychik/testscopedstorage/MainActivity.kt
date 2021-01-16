@@ -41,14 +41,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnLoadFirstImage).setOnClickListener {
             loadFirstImage()
         }
+
+        findViewById<Button>(R.id.btnGoToTestOpen).setOnClickListener {
+            startActivity(Intent(applicationContext, TestOpenFileActivity::class.java))
+        }
     }
 
     private fun test() {
         val readFiles = ReadFiles(this)
 
-        val list = readFiles.getAllFiles()
-        if (list.isEmpty()) Log.d(TAG, "list.isEmpty()")
-        for (i in list) Log.d(TAG, "file = $i")
+        val list = readFiles.getAllFilesAndFolders("/DCIM")
+        if (list.isEmpty()) Log.d(TAG, "list is empty")
+        for (i in list) {
+
+            val relativePath = i.path.replace("/storage/emulated/0/", "") + "/"
+            Log.d(TAG, "relativePath = ${relativePath}")
+            val files = readFiles.getAllFileFromFolder(relativePath)
+            for (j in files) Log.d(TAG, "file.name = ${j.title}, file.uri = ${j.uri}")
+        }
+
+//        val list = readFiles.getAllFiles()
+//        if (list.isEmpty()) Log.d(TAG, "list.isEmpty()")
+//        //        for (i in list) Log.d(TAG, "file = $i")
+//
+//
+//        val listPdf = readFiles.getPdfFiles()
+//        if (listPdf.isEmpty()) Log.d(TAG, "list pdf is empty")
+//        for (i in listPdf) Log.d(TAG, "file = $i")
 
 //        val listPdf = readFiles.getPdfFiles()
 //        if (listPdf.isEmpty()) Log.d(TAG, "list with pdf is empty")
@@ -66,7 +85,8 @@ class MainActivity : AppCompatActivity() {
             override fun onPermissionRationaleShouldBeShown(
                 p0: MutableList<PermissionRequest>?,
                 p1: PermissionToken?
-            ) {}
+            ) {
+            }
         }).check()
     }
 
@@ -79,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "haven't images on device")
             return
         } else {
+            Log.d(TAG, "relativePath = ${list[0].relativePath}")
             showToast("images on device")
             Log.d(TAG, "images on device")
         }

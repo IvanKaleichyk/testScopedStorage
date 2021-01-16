@@ -19,10 +19,10 @@ class ReadFiles(private val context: Context) {
     fun getImages(): List<Image> {
         val uriExternal: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val listRes = mutableListOf<Image>()
-        val projections = arrayOf(MediaStore.Images.Media._ID)
+        val projections =
+            arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.RELATIVE_PATH)
         val sorterOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
         var imageId: Long
-
 
         val cursor = context.contentResolver.query(
             uriExternal,
@@ -37,7 +37,7 @@ class ReadFiles(private val context: Context) {
         while (cursor.moveToNext()) {
             imageId = cursor.getLong(0)
             val uri = Uri.withAppendedPath(uriExternal, "" + imageId)
-            listRes.add(Image(imageId, uri))
+            listRes.add(Image(imageId, uri, relativePath = cursor.getString(1)))
         }
         cursor.close()
         return listRes
@@ -45,9 +45,10 @@ class ReadFiles(private val context: Context) {
 
     @SuppressLint("Recycle")
     fun getPdfFiles(): List<FileModel> {
-        val selection = "_data LIKE '%.pdf'"
+        val selection = "_data LIKE '%.pdf' OR _data LIKE '%.jpg' AND "
+//        val selection = "_data LIKE '%.jpg'"
         val projections =
-            arrayOf(storeFile._ID, storeFile.TITLE)
+            arrayOf(storeFile._ID, storeFile.DISPLAY_NAME)
         val cursor = context.contentResolver.query(
             MediaStore.Files.getContentUri(contentUri),
             projections,
@@ -63,7 +64,7 @@ class ReadFiles(private val context: Context) {
     }
 
     @SuppressLint("Recycle")
-    fun getAllFiles(): List<FileModel>{
+    fun getAllFiles(): List<FileModel> {
         val projections =
             arrayOf(storeFile._ID, storeFile.DISPLAY_NAME)
         val cursor = context.contentResolver.query(
@@ -75,17 +76,52 @@ class ReadFiles(private val context: Context) {
         ) ?: return listOf()
 
         val listRes = mutableListOf<FileModel>()
-        while (cursor.moveToNext()) listRes.add(FileModel(cursor.getLong(0), cursor.getString(1)))
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(0)
+            val uri = Uri.withAppendedPath(MediaStore.Files.getContentUri(contentUri), "" + id)
+            listRes.add(FileModel(id, cursor.getString(1), null, uri))
+        }
         cursor.close()
         return listRes
     }
 
-    fun getAllFilesAndFolders() {
+    fun getAllFilesAndFolders(path: String = ""): List<File> {
 
-        val file = File("/storage/emulated/0")
+        val file = File("/storage/emulated/0$path")
 
+        val listRes = mutableListOf<File>()
         for (i in file.listFiles()!!) {
             Log.d(MainActivity.TAG, "test file = $i, is file.directory - ${i.isDirectory}")
+            listRes.add(i)
         }
+        return listRes
     }
+
+    fun getAllFileFromFolder(path: String): List<FileModel> {
+
+        val selection = "relative_path = '$path'"
+//        val selection = "_data LIKE '%.jpg'"
+        val projections =
+            arrayOf(storeFile._ID, storeFile.DISPLAY_NAME, storeFile.RELATIVE_PATH)
+
+        val cursor = context.contentResolver.query(
+            MediaStore.Files.getContentUri(contentUri),
+            projections,
+            selection,
+            null,
+            null
+        ) ?: return listOf()
+
+        val listRes = mutableListOf<FileModel>()
+        while (cursor.moveToNext()) listRes.add(
+            FileModel(
+                cursor.getLong(0),
+                cursor.getString(1),
+                relativePath = cursor.getString(2)
+            )
+        )
+        cursor.close()
+        return listRes
+    }
+
 }
