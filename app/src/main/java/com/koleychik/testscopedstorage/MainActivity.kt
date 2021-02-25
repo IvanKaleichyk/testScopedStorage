@@ -50,15 +50,22 @@ class MainActivity : AppCompatActivity() {
     private fun test() {
         val readFiles = ReadFiles(this)
 
-        val list = readFiles.getAllFilesAndFolders("/DCIM")
-        if (list.isEmpty()) Log.d(TAG, "list is empty")
-        for (i in list) {
+        val folders = readFiles.getFilesFromRootFolders()
 
-            val relativePath = i.path.replace("/storage/emulated/0/", "") + "/"
-            Log.d(TAG, "relativePath = ${relativePath}")
-            val files = readFiles.getAllFileFromFolder(relativePath)
-            for (j in files) Log.d(TAG, "file.name = ${j.title}, file.uri = ${j.uri}")
+        for (i in folders) {
+            Log.d(TAG, "child of root folder path = ${i.path}")
         }
+
+//        val list = readFiles.getAllFilesAndFolders()
+//        if (list.isEmpty()) Log.d(TAG, "list is empty")
+//        for (i in list) {
+
+//        Log.d(TAG, "i.name = ${i.name}")
+//            val relativePath = i.path.replace("/storage/emulated/0/", "") + "/"
+//            Log.d(TAG, "relativePath = ${relativePath}")
+//            val files = readFiles.getAllFileFromFolder(relativePath)
+//            for (j in files) Log.d(TAG, "file.name = ${j.title}, file.uri = ${j.uri}")
+
 
 //        val list = readFiles.getAllFiles()
 //        if (list.isEmpty()) Log.d(TAG, "list.isEmpty()")

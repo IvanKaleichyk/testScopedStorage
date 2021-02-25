@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import com.koleychik.testscopedstorage.MainActivity.Companion.TAG
 import com.koleychik.testscopedstorage.models.FileModel
 import com.koleychik.testscopedstorage.models.Image
 import java.io.File
@@ -14,6 +15,12 @@ typealias storeFile = MediaStore.Files.FileColumns
 class ReadFiles(private val context: Context) {
 
     private val contentUri = "external"
+
+    fun getFilesFromRootFolders(): List<File> {
+        val file = File("storage/emulated/0")
+        Log.d(TAG, "file root path = ${file.path}")
+        return file.listFiles()!!.toList()
+    }
 
     @SuppressLint("Recycle")
     fun getImages(): List<Image> {
